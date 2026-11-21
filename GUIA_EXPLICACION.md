@@ -1,39 +1,18 @@
-# Guía breve para explicar el proyecto
+# Guía para explicar y demostrar el planificador
 
-## Qué hace
+## Flujo de datos
 
-La aplicación consulta la API REST pública de Villa Peñas y permite explorar paquetes para eventos y productos adicionales. Todos los datos que aparecen en los listados provienen de respuestas HTTP reales.
+Al iniciar, la página solicita los listados de paquetes y adicionales. Al abrir una fila del catálogo llama a `GET /public/paquetes/{id}`. El componente de detalle se desmonta al cerrar la fila y cancela la consulta pendiente. El cliente HTTP centraliza el origen, el manejo de errores y la lectura de JSON.
 
-## Los tres servicios
+Los filtros se aplican sobre las respuestas en memoria, sin distinguir mayúsculas ni tildes. El orden por precio opera sobre la lista filtrada. El estimado tiene un solo paquete base y hasta una selección de cada opción adicional. Cambiar el paquete conserva los adicionales elegidos. La selección y su suma se mantienen en el estado de React hasta que se recarga la página.
 
-1. **`GET /public/paquetes`** devuelve los paquetes activos, con campos como `id`, `nombre`, `descripcion`, `precioColones` y `paquetesServicios`. Se usa para mostrar el catálogo y buscar por nombre, descripción o servicio incluido.
-2. **`GET /public/paquetes/{id}`** devuelve un paquete activo específico y los servicios que incluye. Se llama cuando la persona selecciona una tarjeta y se presenta en el panel de detalle.
-3. **`GET /public/opciones-productos-adicionales`** devuelve opciones activas con el producto, descripción, unidad, cantidades, precio e imagen. Se presenta en el catálogo de adicionales y se puede filtrar por texto.
+## Comprobación
 
-Las tres operaciones se probaron desde Swagger sin ingresar credenciales. El 21 de noviembre de 2026 respondieron `200 OK`; sus comandos cURL solo enviaron el encabezado `Accept`, sin `Authorization`.
+- La compilación de TypeScript y Vite terminó correctamente con `npm run build`.
+- En Chrome se observaron tres GET con HTTP 200 y JSON real. Se abrió el detalle de un paquete, se seleccionó como base y se confirmó que el precio total coincidía con la suma de la base y el adicional. También se verificaron el cambio de paquete, el orden por precio, la búsqueda y la eliminación de opciones.
+- En una prueba aparte se controlaron las respuestas del navegador para comprobar demora, error HTTP 503, reintento y lista vacía. Las capturas de la interfaz y el archivo HAR corresponden a la ejecución con la API real.
+- Se verificó el diseño a 390 px de ancho en un navegador móvil emulado.
 
-## Cómo está organizado
+## Limitaciones observadas
 
-- `src/services/api.ts` concentra las rutas, los tipos TypeScript y las solicitudes `fetch`.
-- `src/components/PackageCard.tsx` dibuja una tarjeta de paquete reutilizable.
-- `src/components/StateMessage.tsx` muestra estados de carga, error y lista vacía.
-- `src/App.tsx` coordina las consultas, la búsqueda, la selección y la vista de detalle.
-
-## Cómo explicar los estados
-
-- **Cargando:** se muestra mientras la API procesa la solicitud.
-- **Error:** se presenta el código o mensaje recibido y se ofrece reintentar.
-- **Sin resultados:** se muestra cuando la API devuelve una lista vacía o cuando el filtro no encuentra coincidencias.
-- **Listo:** se muestran tarjetas, precios, descripciones y servicios de la respuesta.
-
-## Demostración en Network / Red
-
-1. Recarga la aplicación con las herramientas del navegador abiertas.
-2. En **Network / Red**, filtra por `Fetch/XHR`.
-3. Selecciona cada solicitud `GET` y muestra su URL, estado `200` y respuesta JSON.
-4. Haz clic en otro paquete: debe aparecer la consulta de detalle con su identificador.
-5. Escribe en las búsquedas para demostrar el filtro sin sustituir los datos de la API.
-
-## Limitaciones
-
-La interfaz muestra únicamente recursos públicos activos que la API devuelve en el momento de la consulta. Los datos pueden cambiar. Las consultas desde el navegador dependen de la disponibilidad del servidor y de su política CORS.
+La disponibilidad y los precios dependen de la API pública. El monto es orientativo y usa un precio por opción seleccionada. Si el nombre de una opción menciona una cantidad que difiere de los campos numéricos, la interfaz muestra ambos tal como los publica la API. Al consultar desde un sitio publicado en un origen distinto, interviene la configuración CORS del servidor.

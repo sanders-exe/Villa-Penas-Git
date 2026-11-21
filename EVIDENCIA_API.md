@@ -1,13 +1,11 @@
-# Evidencia de consultas HTTP
+# Evidencia de ejecución
 
-Las siguientes consultas se ejecutaron en Swagger con **Try it out**, sin autorizar ningún esquema ni ingresar credenciales. Swagger generó comandos cURL que contienen únicamente `Accept: */*`.
+Comprobación en Chrome el 21 de noviembre de 2026 con Vite en `http://127.0.0.1:5173`. El proxy reenvió las rutas a `https://villa-penas-production.up.railway.app`.
 
-Fecha de verificación: 21 de noviembre de 2026.
-
-| Método y ruta | Estado | Muestra observada |
+| Consulta observada | Resultado | Contenido de ejemplo |
 | --- | --- | --- |
-| `GET /public/paquetes` | `200 OK` | Lista JSON de paquetes activos. El primer elemento tiene `id: 1`, nombre `Paquete Essentials`, descripción, `precioColones: 60000` y servicios incluidos. |
-| `GET /public/paquetes/1` | `200 OK` | Objeto JSON del paquete `Paquete Essentials`, con su precio y servicios: Cocina equipada, Piscina, Playground, Rancho, Trampolín y Wi-Fi. |
-| `GET /public/opciones-productos-adicionales` | `200 OK` | Lista JSON de opciones adicionales. Entre las primeras están Palomitas de maíz, Algodón de azúcar y Fuente de chocolate, con cantidades y precios. |
+| `GET /public/paquetes` | 200 | Dos paquetes públicos con identificadores y precios. |
+| `GET /public/paquetes/1` | 200 | Paquete Essentials y sus seis servicios incluidos. |
+| `GET /public/opciones-productos-adicionales` | 200 | Diez opciones adicionales con nombre de producto, precio y atributos de cantidad. |
 
-Swagger reportó `application/json; charset=utf-8` para las respuestas de listado y detalle. La API puede cambiar el contenido disponible; la interfaz vuelve a consultar los datos al iniciarse.
+En `../Evidencia/` están las capturas del planificador, las de Network y `consultas-api.har`, que contiene las tres solicitudes con sus cuerpos JSON. Para revisarlo en Chrome, abre **Network → Import HAR** y selecciona ese archivo.

@@ -41,26 +41,37 @@ export interface AddOn {
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: 'GET',
+    credentials: 'omit',
     headers: { Accept: 'application/json' },
     signal,
   });
 
   if (!response.ok) {
-    const detail = await response.text().catch(() => '');
-    throw new Error(`La API respondió ${response.status}${detail ? `: ${detail}` : ''}`);
+    throw new Error('El servidor respondió con el estado HTTP ' + response.status + '.');
   }
 
-  return response.json() as Promise<T>;
+  try {
+    return await response.json() as T;
+  } catch (error: unknown) {
+    if (signal?.aborted) throw error;
+    throw new Error('El servidor no devolvió una respuesta JSON válida.');
+  }
+}
+
+async function getList<T>(path: string, signal?: AbortSignal): Promise<T[]> {
+  const data = await getJson<T[]>(path, signal);
+  if (!Array.isArray(data)) throw new Error('El servidor no devolvió una lista válida.');
+  return data;
 }
 
 export const getPublicPackages = (signal?: AbortSignal) =>
-  getJson<PackageItem[]>('/public/paquetes', signal);
+  getList<PackageItem>('/public/paquetes', signal);
 
 export const getPublicPackage = (id: number, signal?: AbortSignal) =>
   getJson<PackageItem>(`/public/paquetes/${id}`, signal);
 
 export const getPublicAddOns = (signal?: AbortSignal) =>
-  getJson<AddOn[]>('/public/opciones-productos-adicionales', signal);
+  getList<AddOn>('/public/opciones-productos-adicionales', signal);
 
 export function imageUrl(path?: string | null): string | undefined {
   if (!path) return undefined;
@@ -73,7 +84,7 @@ export function imageUrl(path?: string | null): string | undefined {
 }
 
 export function formatColones(amount?: number): string {
-  if (typeof amount !== 'number') return 'Precio no disponible';
+  if (typeof amount !== 'number' || !Number.isFinite(amount)) return 'Precio no disponible';
   return new Intl.NumberFormat('es-CR', {
     style: 'currency',
     currency: 'CRC',

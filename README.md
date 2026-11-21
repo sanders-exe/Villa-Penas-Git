@@ -1,57 +1,37 @@
-# Explorador público de Villa Peñas
+# Villa Peñas | Planificador de eventos
 
-Aplicación académica para consumir tres operaciones `GET` públicas de la API Villa Peñas con React, TypeScript y Vite.
+Aplicación en React, TypeScript y Vite para explorar el catálogo público de Villa Peñas y estimar el costo de un evento con un paquete y varios adicionales.
 
-## Servicios consultados
+## Ejecutar
 
-| Operación | Datos relevantes | Uso en la interfaz |
-| --- | --- | --- |
-| `GET /public/paquetes` | Identificador, nombre, descripción, precio y servicios incluidos del catálogo activo. | Lista de paquetes y búsqueda por nombre, descripción o servicio. |
-| `GET /public/paquetes/{id}` | Detalle del paquete activo y los servicios incluidos. | Vista detallada al seleccionar un paquete. |
-| `GET /public/opciones-productos-adicionales` | Nombre del producto y opción, descripción, cantidades, unidad, precio e imagen. | Catálogo de servicios adicionales y búsqueda. |
+Requisitos: Node.js 20.19+ o 22.12+, npm y conexión a internet.
 
-Las tres operaciones están agrupadas en Swagger como públicas. Se verificaron con `Try it out` sin credenciales y respondieron `200 OK` el 21 de noviembre de 2026. Las respuestas observadas usan JSON.
+Desde `Proyecto/`:
 
-## Requisitos
-
-- Node.js 20.19+ o 22.12+.
-- Conexión a internet para instalar dependencias y consultar la API.
-
-## Iniciar el proyecto
-
-En una terminal, desde esta carpeta:
-
-```bash
-npm install
+```sh
+npm ci
 npm run dev
 ```
 
-Abre la dirección local que muestre Vite. Para preparar una versión de producción:
+Abre la dirección que indica Vite. Para verificar tipos y generar la compilación, ejecuta `npm run build`.
 
-```bash
-npm run build
-npm run preview
-```
+## Demostración
 
-## Probar y presentar
-
-1. Abre la aplicación y espera a que carguen los paquetes y adicionales.
-2. Escribe en los campos de búsqueda para filtrar los resultados.
-3. Selecciona un paquete para consultar su detalle desde el endpoint con `{id}`.
-4. Abre las herramientas del navegador y selecciona **Network / Red**. Filtra por `Fetch/XHR` y muestra las solicitudes `GET` a `/public/paquetes`, `/public/paquetes/{id}` y `/public/opciones-productos-adicionales`, junto con sus respuestas.
-5. Si un servicio falla, la interfaz muestra un error y permite reintentar. Las consultas vacías y el estado de carga también tienen mensajes propios.
-
-Los precios, nombres, descripciones e imágenes se obtienen de respuestas reales; la aplicación no sustituye los datos de la API por listas estáticas. El endpoint público devuelve solo elementos activos y el catálogo puede cambiar con el tiempo. Vite reenvía las solicitudes de desarrollo a la API para evitar depender de CORS en el navegador local. Al publicar una compilación en otro dominio, el servidor debe permitir ese origen mediante CORS o un proxy equivalente.
+1. Filtra los paquetes por nombre o servicio y ordénalos por precio.
+2. Abre un paquete para cargar sus servicios. Usa **Usar este paquete** para incorporarlo al estimado.
+3. Busca un adicional y pulsa **Agregar**. El panel **Mi estimado** suma los precios en colones. Puedes quitar elementos, cambiar de paquete o vaciar la selección.
+4. Para repetir la comprobación de HTTP, abre **Network/Red → Fetch/XHR**, recarga la página y abre un paquete. Revisa **Headers** y **Response** de las tres solicitudes.
 
 ## Organización
 
-- `src/services/api.ts`: tipos y funciones HTTP para las tres consultas.
-- `src/components/PackageCard.tsx`: tarjeta reutilizable de paquete.
-- `src/components/StateMessage.tsx`: estados de carga, error y resultado vacío.
-- `src/App.tsx`: pantalla, búsquedas, selección y detalle.
+- `src/services/api.ts` contiene los tipos y las tres consultas GET.
+- `src/hooks/usePublicResource.ts` coordina carga, error, reintento y cancelación.
+- `src/components/` contiene las tarjetas de paquetes y adicionales, el panel de estimado y los mensajes de estado.
+- `src/App.tsx` integra el catálogo, los filtros, el orden y la selección.
+- `FICHA_ANALISIS_SERVICIOS.md` documenta los campos, su uso y la elección de las tres rutas.
+- `GUIA_EXPLICACION.md` describe las decisiones técnicas y las pruebas.
+- `EVIDENCIA_API.md` identifica los archivos de evidencia.
 
-## Documentación complementaria
+## Alcance
 
-- `FICHA_ANALISIS_SERVICIOS.md`: análisis y justificación de los tres endpoints seleccionados.
-- `GUIA_EXPLICACION.md`: resumen para explicar la aplicación y su demostración.
-- `EVIDENCIA_API.md`: registro de las consultas públicas verificadas.
+El estimado es informativo y se conserva durante la sesión de la página. El proxy local de Vite reenvía las consultas GET y las imágenes al servidor de Villa Peñas. En un despliegue web separado, las peticiones dependen de la política CORS del servidor o de un proxy equivalente.
